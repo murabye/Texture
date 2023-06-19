@@ -677,7 +677,7 @@ typedef void (^ASDataControllerSynchronizationBlock)();
 
   ++_editingTransactionGroupCount;
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
-    if (_deallocDelegate.isDeallocating) {
+    if (self->_deallocDelegate.isDeallocating) {
       os_log_debug(ASCollectionLog(), "Editing queue consumed during dealloc");
       return;
     }
@@ -692,12 +692,12 @@ typedef void (^ASDataControllerSynchronizationBlock)();
     // Step 4: Inform the delegate on main thread
     [self->_mainSerialQueue performBlockOnMainThread:^{
       as_activity_scope_leave(&preparationScope);
-      if (_deallocDelegate.isDeallocating) {
+      if (self->_deallocDelegate.isDeallocating) {
         os_log_debug(ASCollectionLog(), "datacontroller batchupdate during dealloc");
         return;
       }
       [self->_delegate dataController:self updateWithChangeSet:changeSet updates:^{
-        if (_deallocDelegate.isDeallocating) {
+        if (self->_deallocDelegate.isDeallocating) {
           os_log_debug(ASCollectionLog(), "updateWithChangeSet during dealloc");
           return;
         }
