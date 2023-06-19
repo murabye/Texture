@@ -83,7 +83,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 #pragma mark -
 #pragma mark ASCollectionView.
 
-@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASCALayerExtendedDelegate, UICollectionViewDelegateFlowLayout> {
+@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASCALayerExtendedDelegate, UICollectionViewDelegateFlowLayout, ASDeallocateStatusProtocol> {
   ASCollectionViewProxy *_proxyDataSource;
   ASCollectionViewProxy *_proxyDelegate;
   
@@ -290,7 +290,8 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   
   _dataController = [[ASDataController alloc] initWithDataSource:self node:owningNode];
   _dataController.delegate = _rangeController;
-  
+  _dataController.deallocDelegate = self;
+
   _batchContext = [[ASBatchContext alloc] init];
   
   _leadingScreensForBatching = 2.0;
@@ -331,6 +332,10 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     [self setAsyncDelegate:nil];
     [self setAsyncDataSource:nil];
   }
+}
+
+- (BOOL)isDeallocating {
+  return _isDeallocating;
 }
 
 #pragma mark -

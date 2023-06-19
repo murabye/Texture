@@ -120,6 +120,32 @@ ASDK_EXTERN NSString * const ASCollectionInvalidUpdateException;
 
 @end
 
+
+/**
+ * Delegate to describe if a parent is deallocating. Used
+ * in the batchUpdates script to check if the blocks should early
+ * return.
+ */
+
+@protocol ASDeallocateStatusProtocol <NSObject>
+
+/**
+ * Communicate to the child whether or not its parent is scheduled for deallocation.
+ *
+ * @discussion This is in response to a hard to reproduce crash where
+ * `performBatchUpdates` is sent on a valid pointer, however the internal UIKit
+ * collection view components such as _UICollectionViewData later reference a nil shared
+ * indexPath store during their many block invokes for a collection view update.
+ * This could be attributed the editingQueue still consuming its tasks
+ * while the collection view is being async deallocated. We want to early return
+ * at editing transation block invocation time since we can not destroy queued blocks;
+ */
+- (BOOL)isDeallocating;
+
+@end
+
+
+
 @protocol ASDataControllerLayoutDelegate <NSObject>
 
 /**
@@ -195,6 +221,12 @@ ASDK_EXTERN NSString * const ASCollectionInvalidUpdateException;
  Delegate to notify when data is updated.
  */
 @property (nonatomic, weak) id<ASDataControllerDelegate> delegate;
+
+/**
+ Delegate to check if parent is deallocating
+ */
+@property (nonatomic, weak) id<ASDeallocateStatusProtocol> deallocDelegate;
+
 
 /**
  * Delegate for preparing layouts. Main thead only.
